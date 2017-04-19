@@ -2,9 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://mryy.com/2017/04/19/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%AE%80%E4%BB%8B/</loc>
+    <loc>http://mryy.com/2016/12/21/Android%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90%E5%AE%9E%E6%88%98/</loc>
     
-    <lastmod>2017-04-19T13:57:32.000Z</lastmod>
+    <lastmod>2017-04-19T14:00:33.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://mryy.com/2016/10/29/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%AE%80%E4%BB%8B/</loc>
+    
+    <lastmod>2017-04-19T14:00:12.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://mryy.com/2017/03/13/RecyclerView-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89LayoutManager/</loc>
+    
+    <lastmod>2017-04-19T13:59:28.000Z</lastmod>
     
   </url>
   
@@ -37,13 +51,6 @@
   </url>
   
   <url>
-    <loc>http://mryy.com/2017/04/19/Android%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90%E5%AE%9E%E6%88%98/</loc>
-    
-    <lastmod>2017-04-19T12:52:41.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://mryy.com/android/Android%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E5%88%86%E6%9E%90%E5%AE%9E%E6%88%98.html</loc>
     
     <lastmod>2017-04-19T12:52:41.000Z</lastmod>
@@ -52,13 +59,6 @@
   
   <url>
     <loc>http://mryy.com/android/RecyclerView-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89LayoutManager.html</loc>
-    
-    <lastmod>2017-04-19T12:49:43.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://mryy.com/2017/04/19/RecyclerView-%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0%E5%8F%8A%E8%87%AA%E5%AE%9A%E4%B9%89LayoutManager/</loc>
     
     <lastmod>2017-04-19T12:49:43.000Z</lastmod>
     

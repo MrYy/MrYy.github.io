@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <title>Archives: 2017/4 | Yang Yang的博客</title>
+  <title>Archives: 2016/12 | Yang Yang的博客</title>
   <meta name="description" content="" />
   <meta name="HandheldFriendly" content="True" />
   <meta name="MobileOptimized" content="320" />
@@ -47,28 +47,24 @@
   <article class="post">
     <header class="post-header">
       <span class="post-meta">
-      <time datetime="2017-04-19T11:15:03.000Z" itemprop="datePublished">
-          2017-04-19
+      <time datetime="2016-12-21T12:52:34.000Z" itemprop="datePublished">
+          2016-12-21
       </time>
     
 </span>
-      <h2 class="post-title"><a href="/2017/04/19/EventBus-源码分析/">EventBus 源码分析</a></h2>
+      <h2 class="post-title"><a href="/2016/12/21/Android内存泄漏分析实战/">Android内存泄漏分析实战</a></h2>
     </header>
     <section class="post-excerpt">
       <p>
       
-        EventBusEventBus本身是一个发布订阅的库，最方便的用处就是消息的回调。指定接收事件的组件，并可以方便的指定运行时的线程，提高了处理UI回调，后台线程执行任务的效率。
-register  发布过程register 主要包括两个过程：
-
-找到当前注册的对象中onEvent相关订阅方法
-订阅者对找出的方法进行订阅。
-
-findSubscriberMethods利用反射找到onEvent开头的方法，如果有比如MainThread、
+        公司相关项目需要进行内存优化，所以整理了一些分析内存泄漏的知识以及工作分析过程。本文中不会刻意的编写一个内存泄漏的程序，然后利用工具去分析它。而是通过介绍相关概念，来分析如何寻找内存泄漏，并附上自己的项目实战过程。撰写过程中，本人深感JVM、操作系统相关知识了解不够深刻，不足之处非常欢迎指正说明。
+#内存泄漏基本概念
+内存检测这部分，相关的知识有JVM虚拟机垃圾收集机制，类加载机制，内存模型，以及操作系统的基础知识（所以不要说JVM有啥
       
       </p>
       
       <p>
-          <a href="/2017/04/19/EventBus-源码分析/" class="excerpt-link">Read More...</a>
+          <a href="/2016/12/21/Android内存泄漏分析实战/" class="excerpt-link">Read More...</a>
       </p>
       
     </section>

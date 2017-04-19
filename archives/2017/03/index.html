@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <title>Archives: 2017/4 | Yang Yang的博客</title>
+  <title>Archives: 2017/3 | Yang Yang的博客</title>
   <meta name="description" content="" />
   <meta name="HandheldFriendly" content="True" />
   <meta name="MobileOptimized" content="320" />
@@ -47,28 +47,22 @@
   <article class="post">
     <header class="post-header">
       <span class="post-meta">
-      <time datetime="2017-04-19T11:15:03.000Z" itemprop="datePublished">
-          2017-04-19
+      <time datetime="2017-03-13T15:49:31.000Z" itemprop="datePublished">
+          2017-03-13
       </time>
     
 </span>
-      <h2 class="post-title"><a href="/2017/04/19/EventBus-源码分析/">EventBus 源码分析</a></h2>
+      <h2 class="post-title"><a href="/2017/03/13/RecyclerView-源码学习及自定义LayoutManager/">RecyclerView 源码学习及自定义LayoutManager</a></h2>
     </header>
     <section class="post-excerpt">
       <p>
       
-        EventBusEventBus本身是一个发布订阅的库，最方便的用处就是消息的回调。指定接收事件的组件，并可以方便的指定运行时的线程，提高了处理UI回调，后台线程执行任务的效率。
-register  发布过程register 主要包括两个过程：
-
-找到当前注册的对象中onEvent相关订阅方法
-订阅者对找出的方法进行订阅。
-
-findSubscriberMethods利用反射找到onEvent开头的方法，如果有比如MainThread、
+        RecyclerView 的三驾马车LayoutManager掌管RecyclerView的布局，你可以通过它实现一个listview、gridview、瀑布流等效果。LayoutManager主要作用与RecyclerView的measure和layout过程中。LayoutManager是RecyclerView中的一个内部抽象类，具体实现类有GridLayoutManager，LinearLayoutManager，Stagger
       
       </p>
       
       <p>
-          <a href="/2017/04/19/EventBus-源码分析/" class="excerpt-link">Read More...</a>
+          <a href="/2017/03/13/RecyclerView-源码学习及自定义LayoutManager/" class="excerpt-link">Read More...</a>
       </p>
       
     </section>
