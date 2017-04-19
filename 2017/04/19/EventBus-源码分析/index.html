@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>EventBus 源码分析 | 个人博客</title>
+  <title>EventBus 源码分析 | Eric Yang的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="register 过程register 主要包括两个过程：  找到当前注册的对象中onEvent相关订阅方法 订阅者对找出的方法进行订阅。  findSubscriberMethods利用反射找到onEvent开头的方法，如果有比如MainThread、BackgroundThread、Async等后缀则标识相应的ThreadMode类型。 123456789101112131415if (mod">
 <meta name="keywords">
 <meta property="og:type" content="article">
 <meta property="og:title" content="EventBus 源码分析">
-<meta property="og:url" content="http://MrYy.com/2017/04/19/EventBus-源码分析/index.html">
-<meta property="og:site_name" content="个人博客">
+<meta property="og:url" content="http://ericyang.com/2017/04/19/EventBus-源码分析/index.html">
+<meta property="og:site_name" content="Eric Yang的博客">
 <meta property="og:description" content="register 过程register 主要包括两个过程：  找到当前注册的对象中onEvent相关订阅方法 订阅者对找出的方法进行订阅。  findSubscriberMethods利用反射找到onEvent开头的方法，如果有比如MainThread、BackgroundThread、Async等后缀则标识相应的ThreadMode类型。 123456789101112131415if (mod">
 <meta property="og:updated_time" content="2017-04-19T11:15:33.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="EventBus 源码分析">
 <meta name="twitter:description" content="register 过程register 主要包括两个过程：  找到当前注册的对象中onEvent相关订阅方法 订阅者对找出的方法进行订阅。  findSubscriberMethods利用反射找到onEvent开头的方法，如果有比如MainThread、BackgroundThread、Async等后缀则标识相应的ThreadMode类型。 123456789101112131415if (mod">
   
-    <link rel="alternate" href="/atom.xml" title="个人博客" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="Eric Yang的博客" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -38,7 +38,7 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">个人博客</a>
+        <a href="/" id="logo">Eric Yang的博客</a>
       </h1>
       
     </div>
@@ -58,7 +58,7 @@
         <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
       </nav>
       <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://MrYy.com"></form>
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://ericyang.com"></form>
       </div>
     </div>
   </div>
@@ -164,7 +164,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://MrYy.com/2017/04/19/EventBus-源码分析/" data-id="cj1ovtoyn0000wws6eg2qiv07" class="article-share-link">Share</a>
+      <a data-url="http://ericyang.com/2017/04/19/EventBus-源码分析/" data-id="cj1oyot7h0000cis64cck33az" class="article-share-link">Share</a>
       
       
     </footer>
