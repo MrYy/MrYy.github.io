@@ -83,7 +83,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="register-过程"><a href="#register-过程" class="headerlink" title="register 过程"></a>register 过程</h2><p>register 主要包括两个过程：</p>
+        <h2 id="EventBus"><a href="#EventBus" class="headerlink" title="EventBus"></a>EventBus</h2><p>EventBus本身是一个发布订阅的库，最方便的用处就是消息的回调。指定接收事件的组件，并可以方便的指定运行时的线程，提高了处理UI回调，后台线程执行任务的效率。</p>
+<h2 id="register-发布过程"><a href="#register-发布过程" class="headerlink" title="register  发布过程"></a>register  发布过程</h2><p>register 主要包括两个过程：</p>
 <ul>
 <li>找到当前注册的对象中onEvent相关订阅方法</li>
 <li>订阅者对找出的方法进行订阅。</li>
@@ -91,7 +92,7 @@
 <h3 id="findSubscriberMethods"><a href="#findSubscriberMethods" class="headerlink" title="findSubscriberMethods"></a>findSubscriberMethods</h3><p>利用反射找到onEvent开头的方法，如果有比如MainThread、BackgroundThread、Async等后缀则标识相应的ThreadMode类型。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">if (modifierString.length() == 0) &#123;</div><div class="line">                        threadMode = ThreadMode.PostThread;</div><div class="line">                    &#125; else if (modifierString.equals(&quot;MainThread&quot;)) &#123;</div><div class="line">                        threadMode = ThreadMode.MainThread;</div><div class="line">                    &#125; else if (modifierString.equals(&quot;BackgroundThread&quot;)) &#123;</div><div class="line">                        threadMode = ThreadMode.BackgroundThread;</div><div class="line">                    &#125; else if (modifierString.equals(&quot;Async&quot;)) &#123;</div><div class="line">                        threadMode = ThreadMode.Async;</div><div class="line">                    &#125; else &#123;</div><div class="line">                        if (skipMethodVerificationForClasses.containsKey(clazz)) &#123;</div><div class="line">                            continue;</div><div class="line">                        &#125; else &#123;</div><div class="line">                            throw new EventBusException(&quot;Illegal onEvent method, check for typos: &quot; + method);</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div></pre></td></tr></table></figure>
 <p>上面代码可以看出，默认方法运行在post事件的线程中，同时我们可以自己指定。<br>找到所有的订阅方法，封装在SubscriberMethod实体中并最终返回。</p>
-<h3 id="subscribe"><a href="#subscribe" class="headerlink" title="subscribe"></a>subscribe</h3><p>第一阶段找到所有方法后，第二阶段先执行下面的代码：</p>
+<h3 id="subscribe-订阅过程"><a href="#subscribe-订阅过程" class="headerlink" title="subscribe 订阅过程"></a>subscribe 订阅过程</h3><p>第一阶段找到所有方法后，第二阶段先执行下面的代码：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">for (SubscriberMethod subscriberMethod : subscriberMethods) &#123;</div><div class="line">    subscribe(subscriber, subscriberMethod, sticky, priority);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>subscribe方法主要包含以下过程：</p>
 <ul>
@@ -161,7 +162,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://ericyang.com/2017/04/19/EventBus-源码分析/" data-id="cj1oyr3we0000drs6uyxx2aen" class="article-share-link">Share</a>
+      <a data-url="http://ericyang.com/2017/04/19/EventBus-源码分析/" data-id="cj1oyy2ho0000gps6r6qe3eru" class="article-share-link">Share</a>
       
       
     </footer>
