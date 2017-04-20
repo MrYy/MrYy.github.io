@@ -1,0 +1,855 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Yang Yang的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="做leetcode二叉树的题目做了不少，觉得有必要总结一下。因为题型多归多，但其实无非就是dfs和bfs，总结一些常见的解法，对于加深这两周算法的理解很有帮助。在做dfs的时候，主要思路是可以从上到下也可以从下到上，也就是分析每一个子树的根节点，然后分析该子树的内部子树或者外部子树的根节点，以此得出递归关系，也即是分治的思想。同时，对于每个节点的处理尝试利用前序、后序、中序遍历三种方法。做bfs的">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二叉树常见问题整理">
+<meta property="og:url" content="http://mryy.com/2016/11/20/二叉树常见问题整理/index.html">
+<meta property="og:site_name" content="Yang Yang的博客">
+<meta property="og:description" content="做leetcode二叉树的题目做了不少，觉得有必要总结一下。因为题型多归多，但其实无非就是dfs和bfs，总结一些常见的解法，对于加深这两周算法的理解很有帮助。在做dfs的时候，主要思路是可以从上到下也可以从下到上，也就是分析每一个子树的根节点，然后分析该子树的内部子树或者外部子树的根节点，以此得出递归关系，也即是分治的思想。同时，对于每个节点的处理尝试利用前序、后序、中序遍历三种方法。做bfs的">
+<meta property="og:image" content="http://img.blog.csdn.net/20161122190249168">
+<meta property="og:image" content="http://img.blog.csdn.net/20161122192518107">
+<meta property="og:updated_time" content="2017-04-20T02:12:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="二叉树常见问题整理">
+<meta name="twitter:description" content="做leetcode二叉树的题目做了不少，觉得有必要总结一下。因为题型多归多，但其实无非就是dfs和bfs，总结一些常见的解法，对于加深这两周算法的理解很有帮助。在做dfs的时候，主要思路是可以从上到下也可以从下到上，也就是分析每一个子树的根节点，然后分析该子树的内部子树或者外部子树的根节点，以此得出递归关系，也即是分治的思想。同时，对于每个节点的处理尝试利用前序、后序、中序遍历三种方法。做bfs的">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20161122190249168">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://mryy.com/2016/11/20/二叉树常见问题整理/"/>
+
+
+
+
+
+  <title> 二叉树常见问题整理 | Yang Yang的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yang Yang的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://mryy.com/2016/11/20/二叉树常见问题整理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yang Yang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yang Yang的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                二叉树常见问题整理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-11-20T23:11:29+08:00">
+                2016-11-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>做leetcode二叉树的题目做了不少，觉得有必要总结一下。因为题型多归多，但其实无非就是dfs和bfs，总结一些常见的解法，对于加深这两周算法的理解很有帮助。<br>在做dfs的时候，主要思路是可以从上到下也可以从下到上，也就是分析每一个子树的根节点，然后分析该子树的内部子树或者外部子树的根节点，以此得出递归关系，也即是分治的思想。同时，对于每个节点的处理尝试利用前序、后序、中序遍历三种方法。<br>做bfs的时候，主要思路是从上到下，一层一层进行分析。</p>
+<hr>
+<p>##构建二叉树<br>leetcode 105和106题</p>
+<blockquote>
+<p>1、利用前序和中序遍历构建二叉树。<br>构建一棵二叉树，如果是通过dfs的方式的话，那么分析每一个子树的根节点，将一个大子树分解成一个一个小的子树，分治下去，也就可以得出递归。<br>比如，有前序1，2，4，5，3，中序4，2，5，1，3。从前序中，我们可以得出一个条件：当前子树的根节点。<br>对于整个子树1，2，4，5，3，可以确定，1是该子树根节点，然后去中序中找1，1的左边是4，2，5，右边是3。因为中序的性质是在遍历完左子树后遍历当前根节点，所以说4，2，5就是1为父节点的一个新的子树。去前序中得到一个新的前序+中序数组对：2，4，5；  4，2，5，同理，2是该子树根节点，4是左子树，5在右子树， 以此类推分治递归下去。<strong>找到递归关系后，每一层根节点完成当前任务，然后将构建子树的任务交给左右子树递归过程即可。</strong>同时，我们思考的过程是从上到下，但程序递归运行的过程是从下到上，这点需要注意。可以写出代码：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function">TreeNode <span class="title">buildTree</span><span class="params">(<span class="keyword">int</span>[] preorder, <span class="keyword">int</span>[] inorder)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (preorder.length != inorder.length) <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        <span class="keyword">if</span> (preorder.length ==<span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        <span class="comment">//完成当前任务，构建当前子树根节点。</span></div><div class="line">        TreeNode node = <span class="keyword">new</span> TreeNode(preorder[<span class="number">0</span>]);</div><div class="line">        <span class="keyword">if</span> (preorder.length == <span class="number">1</span>) <span class="keyword">return</span> node;</div><div class="line">        <span class="keyword">int</span> root = preorder[<span class="number">0</span>];</div><div class="line">        <span class="keyword">int</span> leftCount=<span class="number">0</span>;</div><div class="line">        <span class="comment">//找到根节点位置</span></div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;inorder.length;i++) &#123;</div><div class="line">            <span class="keyword">if</span> (inorder[i] == root)&#123;</div><div class="line">                leftCount = i;</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//将新的构建任务递归交下去。</span></div><div class="line">        node.left = buildTree(Arrays.copyOfRange(preorder, <span class="number">1</span>, leftCount+<span class="number">1</span>),Arrays.copyOfRange(inorder,<span class="number">0</span>,leftCount));</div><div class="line">        node.right = buildTree(Arrays.copyOfRange(preorder, leftCount + <span class="number">1</span>, preorder.length ), Arrays.copyOfRange(inorder, leftCount + <span class="number">1</span>, inorder.length ));</div><div class="line">        <span class="keyword">return</span> node;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>2、利用后序和中序构建二叉树。<br>思路类似，还是先找根节点！可以看到，当前整个子树根节点可以通过后续确定，然后利用中序确定左右子树来分治递归。思路类似。</p>
+</blockquote>
+<hr>
+<p>##构建二叉搜索树 BST<br>leetcode 108和109题</p>
+<blockquote>
+<p>1、通过有序数组来构建一棵平衡二叉搜索树。</p>
+</blockquote>
+<p>首先，对于一个有序数组，比如1，2，3，4，5，6。这里采用dfs解题。前面说过分析dfs时针对每一个子树的根节点，通过各个子树的根节点来寻找递归关系。<br>对于BST最上面的子树，根节点就是有序数组最中间的元素，令s = 0，e = 5，那么mid = s +(e-s)/2 = 2。也就是3是整个子树根节点，1，2是左子树内容，4，5，6是右子树内容。对于1，2有s = 0，e = 1，同理mid = 0，也就是1是该子树根节点，2是右子树内容。 以此类推很容易写出递归：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function">TreeNode <span class="title">dfs</span><span class="params">(<span class="keyword">int</span> s,<span class="keyword">int</span> e,<span class="keyword">int</span>[] nums)</span></span>&#123;</div><div class="line">	<span class="keyword">if</span>(s &gt; e) <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">	<span class="keyword">int</span> mid = s + (e-s)/<span class="number">2</span>;</div><div class="line">	TreeNode root = <span class="keyword">new</span> TreeNode(nums[mid]);</div><div class="line">	root.left = dfs(s,mid-<span class="number">1</span>,nums);</div><div class="line">	root.right = dfs(mid+<span class="number">1</span>,e,nums);</div><div class="line">	<span class="keyword">return</span> root;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里，建议画出递归栈，方便理解。<strong>在思考递归时，是从上到下思考，由整体到局部，但是程序运行时从下到上的，也就是dfs运行方式。</strong>是通过前序遍历的方式，在数组中依次拿出2，1，3，4，5，从下到上构建出BST，构建顺序是dfs的前序方式。</p>
+<blockquote>
+<p>2、通过有序链表来构建一棵平衡二叉搜索树。<br>链表和数组不同了，数组可以随机访问，而链表只能顺序访问。所以，我们的思路应该是，依次将1，2，3，4，5填到BST的正确位置。利用类似1中的dfs，可以得到下图的递归栈，也就是说这5个符合条件的点就是BST中的点。我们从链表中依次拿出1，2，3，4，5，填入到这个树结构并构造BST。可以看到，对于1，应该填在0-&gt;1的位置，2填在1-&gt;1的位置，然后3填在0-&gt;4，4填在3-&gt;4，其实也就是以<strong>中序遍历</strong>的顺序填进去。这样一来，代码也就出来了：<br><img src="http://img.blog.csdn.net/20161122190249168" alt="这里写图片描述"></p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function">TreeNode <span class="title">dfs</span><span class="params">(<span class="keyword">int</span> s, <span class="keyword">int</span> e)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (s &gt; e) <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">int</span> mid = s + (e -s )/<span class="number">2</span>;</div><div class="line">    TreeNode left = dfs(s, mid - <span class="number">1</span>);</div><div class="line">    TreeNode node = <span class="keyword">new</span> TreeNode(head.val);</div><div class="line">    head = head.next;</div><div class="line">    TreeNode right = dfs(mid + <span class="number">1</span>, e);</div><div class="line">    node.left = left;</div><div class="line">    node.right = right;</div><div class="line">    <span class="keyword">return</span> node;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<hr>
+<p>可以看到，在构建树或者BST的过程中，找准根节点位置以及填放顺序，来相应处理即可。</p>
+<hr>
+<p>##按层级遍历问题<br>leetcode 102，103，107都是此类问题，此类问题十分简单，可以采用bfs和dfs求解。</p>
+<blockquote>
+<p>将一棵二叉树按层级遍历。<br><img src="http://img.blog.csdn.net/20161122192518107" alt="这里写图片描述"><br>如果使用bfs，遍历完一层后可以得到下一次的全部节点数，在每一次遍历后一次性遍历整个一层即可。<br>代码类似：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Queue&lt;TreeNode&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</div><div class="line">queue.add(root);</div><div class="line"><span class="keyword">while</span>(!queue.isEmpty())&#123;</div><div class="line">	<span class="keyword">int</span> size = queue.size();</div><div class="line">	<span class="comment">//利用for循环，一次性遍历一个层级。</span></div><div class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;size;i++)&#123;</div><div class="line">		TreeNode cur = queue.poll();</div><div class="line">		queue.add(cur.left);</div><div class="line">		queue.add(cur.right);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果使用dfs，我们无法保证一个层级的全部节点是同一时刻遍历的，但是可以分时遍历，也就是在dfs中添加一个关于level的参数，将同一level的点加入到结果中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">dfs(TreeNode root,<span class="keyword">int</span> level)&#123;</div><div class="line">	<span class="keyword">if</span>(root == <span class="keyword">null</span> ) <span class="keyword">return</span>;</div><div class="line">	<span class="comment">//将当前节点添加到结果中</span></div><div class="line">	result.get(level).add(root);</div><div class="line">	dfs(root.left,level+<span class="number">1</span>);</div><div class="line">	dfs(root.right,level + <span class="number">1</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到，利用level将节点添加到结果链表相应位置，不管是正序，倒叙还是ZigZag，都是相应计算的事，所以还是比较推荐dfs，简单整洁。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/20/KMP算法小探/" rel="next" title="KMP算法小探">
+                <i class="fa fa-chevron-left"></i> KMP算法小探
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/29/动态规划简介/" rel="prev" title="动态规划简介">
+                动态规划简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Yang Yang" />
+          <p class="site-author-name" itemprop="name">Yang Yang</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yang Yang</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

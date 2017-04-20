@@ -1,0 +1,874 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Yang Yang的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Volley基本使用123456789101112131415161718192021222324252627282930313233//声明一个请求队列，请求队列最好全局唯一。      RequestQueue mQueue = Volley.newRequestQueue(context);      //请求的错误回调      Response.ErrorListener errorLi">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Volley源码分析">
+<meta property="og:url" content="http://mryy.com/2016/08/18/Volley源码分析/index.html">
+<meta property="og:site_name" content="Yang Yang的博客">
+<meta property="og:description" content="Volley基本使用123456789101112131415161718192021222324252627282930313233//声明一个请求队列，请求队列最好全局唯一。      RequestQueue mQueue = Volley.newRequestQueue(context);      //请求的错误回调      Response.ErrorListener errorLi">
+<meta property="og:image" content="http://img.blog.csdn.net/20160818160144214">
+<meta property="og:image" content="http://img.blog.csdn.net/20161024115135411">
+<meta property="og:image" content="http://img.blog.csdn.net/20160818161232666">
+<meta property="og:updated_time" content="2017-04-20T02:05:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Volley源码分析">
+<meta name="twitter:description" content="Volley基本使用123456789101112131415161718192021222324252627282930313233//声明一个请求队列，请求队列最好全局唯一。      RequestQueue mQueue = Volley.newRequestQueue(context);      //请求的错误回调      Response.ErrorListener errorLi">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20160818160144214">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://mryy.com/2016/08/18/Volley源码分析/"/>
+
+
+
+
+
+  <title> Volley源码分析 | Yang Yang的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yang Yang的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://mryy.com/2016/08/18/Volley源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yang Yang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yang Yang的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Volley源码分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-18T10:04:45+08:00">
+                2016-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Volley基本使用"><a href="#Volley基本使用" class="headerlink" title="Volley基本使用"></a>Volley基本使用</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">//声明一个请求队列，请求队列最好全局唯一。</div><div class="line">      RequestQueue mQueue = Volley.newRequestQueue(context);</div><div class="line">      //请求的错误回调</div><div class="line">      Response.ErrorListener errorListener = new Response.ErrorListener() &#123;</div><div class="line">          @Override</div><div class="line">          public void onErrorResponse(VolleyError volleyError) &#123;</div><div class="line">          ...</div><div class="line">          &#125;</div><div class="line">      &#125;;</div><div class="line">//请求的正确回调</div><div class="line">Response.Listener listener = new Response.Listener() &#123;</div><div class="line">          @Override</div><div class="line">          public void onResponse(Object o) &#123;</div><div class="line">              </div><div class="line">              </div><div class="line">          &#125;</div><div class="line">      &#125;;</div><div class="line">//封装好的请求</div><div class="line">      StringRequest stringRequest = new StringRequest(Request.Method.POST, url, listener, errorListener) &#123;</div><div class="line"></div><div class="line">              @Override</div><div class="line">              protected Map&lt;String, String&gt; getParams() throws AuthFailureError &#123;</div><div class="line">                  // TODO Auto-generated method stub</div><div class="line">                  if (request.isEmpty())</div><div class="line">                      return super.getParams();</div><div class="line">                  else &#123;</div><div class="line">                      return request;</div><div class="line">                  &#125;</div><div class="line">              &#125;</div><div class="line"></div><div class="line">          &#125;;</div><div class="line">      //将封装好的请求加入到请求队列中去</div><div class="line">      mQueue.add(stringRequest);</div></pre></td></tr></table></figure>
+<hr>
+<p>##整体框架<br><img src="http://img.blog.csdn.net/20160818160144214" alt="这里写图片描述"></p>
+<p>Volley整体框架如上图所示，是一个典型的生产者消费者模式。主要可以分成三个部分，一个是封装好的Request，包含请求的类型等等，然后将其投入到RequestQueue中，之后有一个用于分发请求的线程Dispatcher，进行网络请求的执行和回调。下面分部分分析：<br>关键类的UML图，主要四个类为：请求Request、响应Response、网络执行工人线程NetWorkExecutor、结果UI线程回调ResponseDelivery<br><img src="http://img.blog.csdn.net/20161024115135411" alt="这里写图片描述"></p>
+<hr>
+<h3 id="Request"><a href="#Request" class="headerlink" title="Request"></a>Request</h3><p><img src="http://img.blog.csdn.net/20160818161232666" alt="这里写图片描述"><br>抽象父类Request，有多个不同种类的Request。StringRequest的构造器调用父类构造器，在Request中存储http请求的方式，Url和失败回调的地址。成功的回调是一个泛型接口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">public interface Listener&lt;T&gt; &#123;</div><div class="line">    /** Called when a response is received. */</div><div class="line">    public void onResponse(T response);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里我们将类型参数赋值为String，然后将接口实现并存储在StringRequest中的mListener中。在Request中另有抽象方法parseNetworkResponse和deliverResponse，子类实现，后面消费者消费Request时候，调用parseNetworkResponse解析原始的响应，然后调用deliverResponse分发给UI线程。<br>StringRequest的具体实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">    protected Response&lt;String&gt; parseNetworkResponse(NetworkResponse response) &#123;</div><div class="line">        String parsed;</div><div class="line">        try &#123;</div><div class="line">            parsed = new String(response.data, HttpHeaderParser.parseCharset(response.headers));</div><div class="line">        &#125; catch (UnsupportedEncodingException e) &#123;</div><div class="line">            parsed = new String(response.data);</div><div class="line">        &#125;</div><div class="line">        return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>将网络响应的报文体直接按字符串转换，封装进Response返回。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">protected void deliverResponse(String response) &#123;</div><div class="line">    if (mListener != null) &#123;</div><div class="line">        mListener.onResponse(response);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后将Respone通过设置的回调接口，调用来处理客户端想要处理的逻辑。<br>这种典型的写法启示我们，在实现异步逻辑的时候，可以将客户端想要的逻辑利用接口实现，然后封装进一个实体中，当线程完成工作后调用这个实体存储的接口实现，从而客户端可以异步实现逻辑。</p>
+<p>###RequestQueue<br>大致了解了封装的实体类Request后，来看一下生产者和消费者连接的部分RequestQueue。<br>调用Volley类中静态方法newRequestQueue来实例化一个RequestQueue</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public RequestQueue(Cache cache, Network network, int threadPoolSize,</div><div class="line">        ResponseDelivery delivery) &#123;</div><div class="line">    mCache = cache;</div><div class="line">    mNetwork = network;</div><div class="line">    mDispatchers = new NetworkDispatcher[threadPoolSize];</div><div class="line">    mDelivery = delivery;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>构造器中，cache是缓存文件目录，network中封装了如何将Request转化为http请求的方法performRequest，类似于策略模式。Dispatchers就是从队列中拿出Request进行网络请求的workerThread消费者，delivery默认值是new ExecutorDelivery(new Handler(Looper.getMainLooper()))，其中的handler和UI线程的Looper相连，从而可以通过handler向UI线程的消息队列发送消息更改UI，delivery也就是结果处理后的界面更改回调。<br>综上，RequestQueue中封装了Request转换为网络请求的方法，分发请求的工作线程，将结果发送给UI的传递者。<br>调用requestQueue.start()后，启动缓存线程和网络请求线程，主要分析网络请求部分：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">for (int i = 0; i &lt; mDispatchers.length; i++) &#123;</div><div class="line">    NetworkDispatcher networkDispatcher = new NetworkDispatcher(mNetworkQueue, mNetwork,</div><div class="line">            mCache, mDelivery);</div><div class="line">    mDispatchers[i] = networkDispatcher;</div><div class="line">    networkDispatcher.start();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>mDispachers是一个数组，类似线程池存储着工人线程。NetworkDispatcher是worker thread，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">public void quit() &#123;</div><div class="line">    mQuit = true;</div><div class="line">    interrupt();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>quit方法通过interrupt和标志位中断一个线程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">    public void run() &#123;</div><div class="line">		//设置当前线程为后台线程，减少对于UI线程渲染的影响</div><div class="line">        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);</div><div class="line">        Request&lt;?&gt; request;</div><div class="line">        while (true) &#123;</div><div class="line">            long startTimeMs = SystemClock.elapsedRealtime();</div><div class="line">            // release previous request object to avoid leaking request object when mQueue is drained.</div><div class="line">            request = null;</div><div class="line">            try &#123;</div><div class="line">                // Take a request from the queue.</div><div class="line">                request = mQueue.take();</div><div class="line">            &#125; catch (InterruptedException e) &#123;</div><div class="line">                // We may have been interrupted because it was time to quit.</div><div class="line">                //检查标志位，看队列是否结束</div><div class="line">                if (mQuit) &#123;</div><div class="line">                    return;</div><div class="line">                &#125;</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            try &#123;</div><div class="line"></div><div class="line">                // If the request was cancelled already, do not perform the</div><div class="line">                // network request.</div><div class="line">                if (request.isCanceled()) &#123;</div><div class="line">                    request.finish(&quot;network-discard-cancelled&quot;);</div><div class="line">                    continue;</div><div class="line">                &#125;</div><div class="line"></div><div class="line"></div><div class="line">                // 这里调用网络请求策略network，将Request转化为网络请求处理。获得响应封装。</div><div class="line">                NetworkResponse networkResponse = mNetwork.performRequest(request);</div><div class="line"></div><div class="line">				//304缓存处理。没有修改，不进行http请求维持原状。</div><div class="line">                if (networkResponse.notModified &amp;&amp; request.hasHadResponseDelivered()) &#123;</div><div class="line">                    request.finish(&quot;not-modified&quot;);</div><div class="line">                    continue;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                // 将原始的网络请求解析，这里是按照StringRequest的方式解析。</div><div class="line">                Response&lt;?&gt; response = request.parseNetworkResponse(networkResponse);</div><div class="line"></div><div class="line">                //缓存相关</div><div class="line">                if (request.shouldCache() &amp;&amp; response.cacheEntry != null) &#123;</div><div class="line">                    mCache.put(request.getCacheKey(), response.cacheEntry);</div><div class="line">                    request.addMarker(&quot;network-cache-written&quot;);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                // delivery，分发更改UI</div><div class="line">                request.markDelivered();</div><div class="line">                mDelivery.postResponse(request, response);</div><div class="line">            &#125; catch (VolleyError volleyError) &#123;</div><div class="line">                volleyError.setNetworkTimeMs(SystemClock.elapsedRealtime() - startTimeMs);</div><div class="line">                parseAndDeliverNetworkError(request, volleyError);</div><div class="line">            &#125; catch (Exception e) &#123;</div><div class="line">                VolleyLog.e(e, &quot;Unhandled exception %s&quot;, e.toString());</div><div class="line">                VolleyError volleyError = new VolleyError(e);</div><div class="line">                volleyError.setNetworkTimeMs(SystemClock.elapsedRealtime() - startTimeMs);</div><div class="line">                mDelivery.postError(request, volleyError);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<hr>
+<p>###Delivery<br>分发部分的实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public void postResponse(Request&lt;?&gt; request, Response&lt;?&gt; response, Runnable runnable) &#123;</div><div class="line">    request.markDelivered();</div><div class="line">    request.addMarker(&quot;post-response&quot;);</div><div class="line">    mResponsePoster.execute(new ResponseDeliveryRunnable(request, response, runnable));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">mResponsePoster = new Executor() &#123;</div><div class="line">    @Override</div><div class="line">    public void execute(Runnable command) &#123;</div><div class="line">        handler.post(command);</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>ResponseDeliveryRunnable是给UI线程的Handler发送的Runnable，也就是说这部分是执行在UI线程上的，其中逻辑部分：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">@SuppressWarnings(&quot;unchecked&quot;)</div><div class="line">        @Override</div><div class="line">        public void run() &#123;</div><div class="line">            // If this request has canceled, finish it and don&apos;t deliver.</div><div class="line">            if (mRequest.isCanceled()) &#123;</div><div class="line">                mRequest.finish(&quot;canceled-at-delivery&quot;);</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            // 调用我们定义的Request中的listener回调</div><div class="line">            if (mResponse.isSuccess()) &#123;</div><div class="line">                mRequest.deliverResponse(mResponse.result);</div><div class="line">            &#125; else &#123;</div><div class="line">                mRequest.deliverError(mResponse.error);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            // If this is an intermediate response, add a marker, otherwise we&apos;re done</div><div class="line">            // and the request can be finished.</div><div class="line">            if (mResponse.intermediate) &#123;</div><div class="line">                mRequest.addMarker(&quot;intermediate-response&quot;);</div><div class="line">            &#125; else &#123;</div><div class="line">                mRequest.finish(&quot;done&quot;);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            // If we have been provided a post-delivery runnable, run it.</div><div class="line">            if (mRunnable != null) &#123;</div><div class="line">                mRunnable.run();</div><div class="line">            &#125;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<p>可以看在，最初在Request中封装的更改UI的listener，在mRequest.deliverResponse(mResponse.result); 被异步调用并执行，并且通过ExecutorDelivery确保在UI线程中执行，ExecutorDelivery类似命令模式，dispatcher负责网络部分，Delivery负责UI部分，确保收到的每个Request响应的回调执行在UI线程中。</p>
+<hr>
+<p>##总结<br>作为生产者-消费者模式，客户端可以将网络请求的处理方式，获取响应后的处理逻辑封装进Request，然后放进RequestQueue中。对于一个全局的RequestQueue，维护一个工作线程池，利用多个线程从队列中去除Request去执行网络请求，根据Request中封装的网络请求方法获取Response后，将结果给Delivery。然后通过Delivery分发给UI线程，调用Request中更新的UI处理逻辑。<br>对比传统的通过新建线程实现网络请求的方式，volley采用的方式不仅逻辑清晰、易于管理，同时将线程维护、UI更新这部分不易发生变化的工作封装，用户也可通过继承Request实现扩展，增强了可维护性。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/20/android-消息系统Handler、Message、Looper/" rel="next" title="android 消息系统Handler、Message、Looper">
+                <i class="fa fa-chevron-left"></i> android 消息系统Handler、Message、Looper
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Yang Yang" />
+          <p class="site-author-name" itemprop="name">Yang Yang</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Volley基本使用"><span class="nav-number">1.</span> <span class="nav-text">Volley基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Request"><span class="nav-number">1.1.</span> <span class="nav-text">Request</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yang Yang</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

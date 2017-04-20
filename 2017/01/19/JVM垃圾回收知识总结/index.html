@@ -1,0 +1,887 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Yang Yang的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="##前言java文件被jvm编译成.class文件，.class文件中全部是二进制的数据。在JVM中用一个8bit的变量类型存储指令，这样0到255可以表示总共256个指令。我们编写的代码被编译成相应的指令码交给计算机执行，而在对代码进行调优的时候，可以读懂编译后的.class文件也是很重要的。 ##基础知识 ###Java内存模型首先要先了解一下Java的内存模型，我们比较关心的主要有四个部分：">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM垃圾回收知识总结">
+<meta property="og:url" content="http://mryy.com/2017/01/19/JVM垃圾回收知识总结/index.html">
+<meta property="og:site_name" content="Yang Yang的博客">
+<meta property="og:description" content="##前言java文件被jvm编译成.class文件，.class文件中全部是二进制的数据。在JVM中用一个8bit的变量类型存储指令，这样0到255可以表示总共256个指令。我们编写的代码被编译成相应的指令码交给计算机执行，而在对代码进行调优的时候，可以读懂编译后的.class文件也是很重要的。 ##基础知识 ###Java内存模型首先要先了解一下Java的内存模型，我们比较关心的主要有四个部分：">
+<meta property="og:image" content="http://img.blog.csdn.net/20170119193553642?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20170124112234731?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20170119194745288?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20170119234727453?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:updated_time" content="2017-04-20T02:03:25.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM垃圾回收知识总结">
+<meta name="twitter:description" content="##前言java文件被jvm编译成.class文件，.class文件中全部是二进制的数据。在JVM中用一个8bit的变量类型存储指令，这样0到255可以表示总共256个指令。我们编写的代码被编译成相应的指令码交给计算机执行，而在对代码进行调优的时候，可以读懂编译后的.class文件也是很重要的。 ##基础知识 ###Java内存模型首先要先了解一下Java的内存模型，我们比较关心的主要有四个部分：">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20170119193553642?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://mryy.com/2017/01/19/JVM垃圾回收知识总结/"/>
+
+
+
+
+
+  <title> JVM垃圾回收知识总结 | Yang Yang的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yang Yang的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://mryy.com/2017/01/19/JVM垃圾回收知识总结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yang Yang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yang Yang的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                JVM垃圾回收知识总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-19T10:01:42+08:00">
+                2017-01-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>##前言<br>java文件被jvm编译成.class文件，.class文件中全部是二进制的数据。在JVM中用一个8bit的变量类型存储指令，这样0到255可以表示总共256个指令。我们编写的代码被编译成相应的指令码交给计算机执行，而在对代码进行调优的时候，可以读懂编译后的.class文件也是很重要的。</p>
+<p>##基础知识</p>
+<p>###Java内存模型<br><img src="http://img.blog.csdn.net/20170119193553642?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br>首先要先了解一下Java的内存模型，我们比较关心的主要有四个部分：堆，虚拟机栈，本地方法栈，方法区。<br>堆一般存放对象实例，也就是我们new 分配的对象，堆中依据对象存活时间分为新生代和老年代，新生代中又分为Eden空间和Survivor空间（主要是执行复制回收算法时使用的空间），新生代的Survivor空间又分成from空间和to空间。这里简单介绍一下新生代中发生垃圾回收的过程：<br><img src="http://img.blog.csdn.net/20170124112234731?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"><br>新生代生成对象的时候，首先分配在Eden区，当Eden区满了以后，执行复制清除算法，将Eden区的对象复制到From然后清除Edne区。这样下一轮时，可以继续在Eden区中分配，Eden和From区是目前存活的对象，当Eden再次满了以后，下一次MinorGC（针对新生代的GC，MajorGC针对老年代，FullGC针对全部）会将Eden和From复制到To中并清除原来的内容，以此类推。如果存活的对象太多导致Survivor区域无法容纳，还需要老年代进行分配担保，将无法保存在Survivor中的对象直接晋升到老年代。<br>方法区主要存放一些静态变量，类信息等，通常我们可以把这部分看作永久代，因为其中分配的对象不会被垃圾收集。<br>运行时常量池是class文件中每一个类或者接口的常量表，包含了字面量和符号饮用，充当一个符号表的作用。比如Java中的字符串，默认声明其实作为字面量存储在常量池中的，参考如下代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String a = &quot;abc&quot;;</div><div class="line">      String b = &quot;abc&quot;;</div><div class="line">      String c = new String(&quot;abc&quot;);</div><div class="line">      System.out.println(a == b);</div><div class="line">      System.out.println(a == c);</div></pre></td></tr></table></figure>
+<p>代码中，a==b返回true，a==c返回false，这是因为默认a和b的声明方式实际是在常量池中声明一个符号，然后a和b都指向那个符号”abc”，而c是在堆中声明了一个char数组。java中==默认判断的是两个值地址是否相等，所以第一个返回true，第二个返回false。<br>前面提到，常量池相当于一个符号表。我们可以把它看作一个表结构，键是常量地址，值就是存储的值。如下：<br><img src="http://img.blog.csdn.net/20170119194745288?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>而符号引用，其实就是指类和接口的全限定名和方法的描述符，熟悉jni的话会比较清楚这些东西。简单来讲，在一个实例中可能有另一个对象的引用，那么在class文件中其实存放的是符号引用，也就是java/lang/object 这种字符串，而不是真正的指向内存地址的引用。在动态链接的过程，才会把class文件中这些“假的”符号饮用转换成真正的直接引用（也就是指向一个内存地址）。<br>本地方法栈就是通过Jni调用底层方法的时候，本地C/C++代码执行时候的方法栈。<br>虚拟机栈就是我们的Java代码执行的栈了，也是本文的重点。<br>￼</p>
+<p>###Java虚拟机栈</p>
+<p>####栈帧<br>当一个方法被调用的时候，就进入它所在的方法栈，栈帧随着方法的创建而创建，随着方法的结束而销毁。每一个栈帧都拥有自己的本地变量表，操作数栈和运行时常量池的引用。</p>
+<p>####局部变量表<br>局部变量表中用slot来进行存储，一个slot可以存放一个boolean、byte、char、short、int、float、reference或returnAddress的数据，两个slot可以存储一个long或double。</p>
+<p>####操作数栈<br>每个栈帧中有一个操作数栈，用来存放指令执行的中间结果。有点类似于一个栈实现的计算器。<br>比如当我们执行一个iadd指令中，则要求操作数栈顶是两个int类型的数值，执行iadd后会把两个数值取出来求和再把结果放回操作数栈中。</p>
+<p>###基本指令集<br>.class文件是二进制文件，严格规定了每个字节的含义。是一组以8位字节为基础单位的二进制流，所以又叫字节码。只有两种数据类型：无符号数和表。<br>无符号数可以存放数字、索引引用或者UTF－8编码构成的字符串值。<br>表是无符号数和其他表构成的符合数据类型。指令码由一个字节表示，不同的数字0到200多代表不同的指令。<br>当然在分析的时候，我们一般使用javap -verbose 命令对class文件进行反编译，可以得到相应的明文指令，避免了我们对字节码参照JVM规范手册人工去翻译。所以我们主要关注的是一些指令的具体含义。</p>
+<p>####加载和存储指令</p>
+<ul>
+<li>将一个本地变量加载到操作数栈：load相关指令，比如iload加载int类型，fload加载float类型等</li>
+<li>将数值从操作数栈加载到本地变量表：store相关指令</li>
+<li>加载常量到操作数栈：push、const相关指令<br>对于一些指令，比如iload_1,iload_2就是将操作数隐藏在指令中，就等同于iload 1，iload 2.<br>此外，需要说明，iconst n是把常量n压入操作数栈，istore n 是把操作数栈顶的数存在本地变量表第n个位置，iload n是把本地变量表第n个元素压入操作数栈，本地变量表可以看作一个ArrayList链表数据结构。<br><img src="http://img.blog.csdn.net/20170119234727453?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></li>
+</ul>
+<p>可以看到在栈帧中，对于变量的操作流程，基本就是把值从常量池拿到操作数栈，要存储的话就放在本地变量表，要计算了再拿到操作数栈，然后调用相应的指令进行计算。</p>
+<p>####算数指令<br>算数指令用于两个操作数栈上的值进行特定运算，并把计算结果压入操作数栈。比如add，sub，mul，div相关。</p>
+<p>####方法调用和返回指令<br>invokevirtual用于调用实例方法，invokespecial用于调用一些特殊实例方法，比如构造方法，invokestatic用于调用静态方法。<br>返回指令即return相关，比如ireturn。</p>
+<p>####其余指令<br>其余指令包括类型转换指令，对象创建与操作指令，操作数栈管理指令和控制转移指令，在这里不详细介绍可以查阅Java虚拟机规范。</p>
+<p>##实例<br>下面介绍一个工程实例，Java代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">cal</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> a = <span class="number">1</span>;</div><div class="line">        <span class="keyword">int</span> b = <span class="number">1</span>;</div><div class="line">        <span class="keyword">return</span> a + b;</div><div class="line">    &#125;</div><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getInteger</span><span class="params">()</span> </span>&#123;</div><div class="line">        Random random = <span class="keyword">new</span> Random();</div><div class="line">        <span class="keyword">return</span> random.nextInt(<span class="number">5</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>利用javap -verbose命令对class文件进行反编译，查看字节码：<br>反编译后，生成的字节码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div></pre></td><td class="code"><pre><div class="line">public class Main</div><div class="line">  minor version: 0</div><div class="line">  major version: 52</div><div class="line">  flags: ACC_PUBLIC, ACC_SUPER</div><div class="line">Constant pool:</div><div class="line">   #1 = Methodref          #6.#24         // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</div><div class="line">   #2 = Class              #25            // java/util/Random</div><div class="line">   #3 = Methodref          #2.#24         // java/util/Random.&quot;&lt;init&gt;&quot;:()V</div><div class="line">   #4 = Methodref          #2.#26         // java/util/Random.nextInt:(I)I</div><div class="line">   #5 = Class              #27            // Main</div><div class="line">   #6 = Class              #28            // java/lang/Object</div><div class="line">   #7 = Utf8               &lt;init&gt;</div><div class="line">   #8 = Utf8               ()V</div><div class="line">   #9 = Utf8               Code</div><div class="line">  #10 = Utf8               LineNumberTable</div><div class="line">  #11 = Utf8               LocalVariableTable</div><div class="line">  #12 = Utf8               this</div><div class="line">  #13 = Utf8               LMain;</div><div class="line">  #14 = Utf8               cal</div><div class="line">  #15 = Utf8               ()I</div><div class="line">  #16 = Utf8               a</div><div class="line">  #17 = Utf8               I</div><div class="line">  #18 = Utf8               b</div><div class="line">  #19 = Utf8               getInteger</div><div class="line">  #20 = Utf8               random</div><div class="line">  #21 = Utf8               Ljava/util/Random;</div><div class="line">  #22 = Utf8               SourceFile</div><div class="line">  #23 = Utf8               Main.java</div><div class="line">  #24 = NameAndType        #7:#8          // &quot;&lt;init&gt;&quot;:()V</div><div class="line">  #25 = Utf8               java/util/Random</div><div class="line">  #26 = NameAndType        #29:#30        // nextInt:(I)I</div><div class="line">  #27 = Utf8               Main</div><div class="line">  #28 = Utf8               java/lang/Object</div><div class="line">  #29 = Utf8               nextInt</div><div class="line">  #30 = Utf8               (I)I</div><div class="line">&#123;</div><div class="line">  public Main();</div><div class="line">    descriptor: ()V</div><div class="line">    flags: ACC_PUBLIC</div><div class="line">    Code:</div><div class="line">      stack=1, locals=1, args_size=1</div><div class="line">         0: aload_0</div><div class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</div><div class="line">         4: return</div><div class="line">      LineNumberTable:</div><div class="line">        line 3: 0</div><div class="line">      LocalVariableTable:</div><div class="line">        Start  Length  Slot  Name   Signature</div><div class="line">            0       5     0  this   LMain;</div><div class="line"></div><div class="line">  public int cal();</div><div class="line">    descriptor: ()I</div><div class="line">    flags: ACC_PUBLIC</div><div class="line">    Code:</div><div class="line">      stack=2, locals=3, args_size=1</div><div class="line">         0: iconst_1</div><div class="line">         1: istore_1</div><div class="line">         2: iconst_1</div><div class="line">         3: istore_2</div><div class="line">         4: iload_1</div><div class="line">         5: iload_2</div><div class="line">         6: iadd</div><div class="line">         7: ireturn</div><div class="line">      LineNumberTable:</div><div class="line">        line 6: 0</div><div class="line">        line 7: 2</div><div class="line">        line 8: 4</div><div class="line">      LocalVariableTable:</div><div class="line">        Start  Length  Slot  Name   Signature</div><div class="line">            0       8     0  this   LMain;</div><div class="line">            2       6     1     a   I</div><div class="line">            4       4     2     b   I</div><div class="line"></div><div class="line">  public int getInteger();</div><div class="line">    descriptor: ()I</div><div class="line">    flags: ACC_PUBLIC</div><div class="line">    Code:</div><div class="line">      stack=2, locals=2, args_size=1</div><div class="line">         0: new           #2                  // class java/util/Random</div><div class="line">         3: dup</div><div class="line">         4: invokespecial #3                  // Method java/util/Random.&quot;&lt;init&gt;&quot;:()V</div><div class="line">         7: astore_1</div><div class="line">         8: aload_1</div><div class="line">         9: iconst_5</div><div class="line">        10: invokevirtual #4                  // Method java/util/Random.nextInt:(I)I</div><div class="line">        13: ireturn</div><div class="line">      LineNumberTable:</div><div class="line">        line 12: 0</div><div class="line">        line 13: 8</div><div class="line">      LocalVariableTable:</div><div class="line">        Start  Length  Slot  Name   Signature</div><div class="line">            0      14     0  this   LMain;</div><div class="line">            8       6     1 random   Ljava/util/Random;</div><div class="line">&#125;</div><div class="line">SourceFile: &quot;Main.java&quot;</div></pre></td></tr></table></figure>
+<p>下面开始分析主要部分：</p>
+<p>###运行时常量池<br>Constant pool 就是前面提到的运行时常量池，类似一个符号表，前面表示在常量池中的地址，后面的字段就是相应的值，同时Javap还会帮助我们生成一些字段辅助查看：</p>
+<p>   #1 = Methodref          #6.#24         // java/lang/Object.”<init>“:()V</init></p>
+<p>   #2 = Class              #25            // java/util/Random</p>
+<p>  #25 = Utf8               java/util/Random</p>
+<p>  #26 = NameAndType        #29:#30        // nextInt:(I)I</p>
+<p>在我们class文件的常量池中有四种类型的常量，Utf8就是字面常量，一个字符串。而Methodref是一个方法的符号引用，为什么说是符号引用呢，就是因为最后看到它其实就是一个方法描述符：字符串而已。同时，Class表示引用到的一个类，NameAndType表示一个字段或者方法。</p>
+<h3 id="Code属性"><a href="#Code属性" class="headerlink" title="Code属性"></a>Code属性</h3><p>下面是方法的描述符标志位等信息，然后是最重要的信息：code属性。<br>分析其中的cal方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public int cal();</div><div class="line">    descriptor: ()I</div><div class="line">    flags: ACC_PUBLIC</div><div class="line">    Code:</div><div class="line">      stack=2, locals=3, args_size=1</div><div class="line">	  ...</div><div class="line">      LineNumberTable:</div><div class="line">        line 6: 0</div><div class="line">        line 7: 2</div><div class="line">        line 8: 4</div><div class="line">      LocalVariableTable:</div><div class="line">        Start  Length  Slot  Name   Signature</div><div class="line">            0       8     0  this   LMain;</div><div class="line">            2       6     1     a   I</div><div class="line">            4       4     2     b   I</div></pre></td></tr></table></figure>
+<p>stack ＝ 2表明操作数栈最大深度是2，locals＝3是本地变量表最大数目为3，args_size ＝ 1，是因为该方法是实例方法，所以默认有一个输入参数this，指向方法所在的实例。<br>下面的LineNumberTable表示java源代码和字节码的对应关系，用于堆栈跟踪。<br>LocalVariableTable描述局部变量表中的变量和Java源代码定义变量的对应关系。其中start代表局部变量声明开始，length表示在字节码中存活的长度，结合起来就是作用域范围。参考下面的指令码：this在一开始就声明，时间限定为0，变量a在第二个时刻 istore_1存入局部变量表，所以start的值就是2，b在第四个时刻存入，所以start是4，声明周期可以依次推理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">0: iconst_1</div><div class="line">1: istore_1</div><div class="line">2: iconst_1</div><div class="line">3: istore_2</div><div class="line">4: iload_1</div><div class="line">5: iload_2</div><div class="line">6: iadd</div><div class="line">7: ireturn</div></pre></td></tr></table></figure>
+<p>再来简单分析一下指令，结合前面提高的指令介绍：<br>iconst_1，将常数1加载到操作数栈，istore_1将1从操作数栈栈顶元素1存储到局部变量表第一个位置，下面的2，3条指令同理。iload_1把局部变量表第一个元素加入操作数栈，iload_2同理，现在操作数栈有两个元素 1、1，然后iadd取出栈顶两个元素相加，ireturn返回。</p>
+<p>##总结<br>基本内容就是这些，对于字节码的学习，更详细的内容可以参考Java虚拟机规范。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/13/RecyclerView-源码学习及自定义LayoutManager/" rel="next" title="RecyclerView 源码学习及自定义LayoutManager">
+                <i class="fa fa-chevron-left"></i> RecyclerView 源码学习及自定义LayoutManager
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/21/Android内存泄漏分析实战/" rel="prev" title="Android内存泄漏分析实战">
+                Android内存泄漏分析实战 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="Yang Yang" />
+          <p class="site-author-name" itemprop="name">Yang Yang</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Code属性"><span class="nav-number">1.</span> <span class="nav-text">Code属性</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yang Yang</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
