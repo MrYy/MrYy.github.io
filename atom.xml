@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://mryy.com/"/>
-  <updated>2017-04-19T12:41:57.000Z</updated>
+  <updated>2017-11-30T15:21:45.000Z</updated>
   <id>http://mryy.com/</id>
   
   <author>
@@ -14,6 +14,69 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>IDEA插件开发（一）</title>
+    <link href="http://mryy.com/2017/11/30/IDEA%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%EF%BC%88%E4%B8%80%EF%BC%89/"/>
+    <id>http://mryy.com/2017/11/30/IDEA插件开发（一）/</id>
+    <published>2017-11-30T14:25:07.000Z</published>
+    <updated>2017-11-30T15:21:45.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="插件基本效果"><a href="#插件基本效果" class="headerlink" title="插件基本效果"></a>插件基本效果</h2><p><img src="http://img.blog.csdn.net/20171130223706096?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>通过这个build模式生成插件的编写，可以了解插件编写的基本规范，一些常用的概念以及流程。这个插件的作用就是选择一个Bean中的可用域，然后生成常见的builder模式中的set代码以及相应的build方法。</p>
+<p>作为一个练手的插件，基本可以实现IDEA插件开发入门的目的。</p>
+<p>在本文，假设你已经按照官方文档成功搭建了开发环境，所以这里把重点放在概念理解，以及插件编程的基本思路。</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="AnActionEvent"><a href="#AnActionEvent" class="headerlink" title="AnActionEvent"></a>AnActionEvent</h3><p>actionPerformed回调方法的参数，类似一个大大的包裹，里面有一个操作被触发时，当前的所有信息，包括光标位置、编辑器、项目等等。</p>
+<h3 id="Project"><a href="#Project" class="headerlink" title="Project"></a>Project</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">final</span> Project project = e.getRequiredData(CommonDataKeys.PROJECT);</div></pre></td></tr></table></figure>
+<p>从大包裹中获得，我们知道IDEA可以通过New Project同时打开多个项目，这个Project就是当前插件回调触发的项目的上下文。</p>
+<h3 id="Editor"><a href="#Editor" class="headerlink" title="Editor"></a>Editor</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">final</span> Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);</div></pre></td></tr></table></figure>
+<p>当前编辑器，可以通过editor直接执行一些读些操作。</p>
+<h3 id="Document"><a href="#Document" class="headerlink" title="Document"></a>Document</h3><p>Document就是可以编辑的Unicode字符序列，可以通过获取Editor来获取Document。对于任何基于文本的修改，而非Java Tree结构的修改，可以采用Document进行，比如说简单向代码文件中添加一些任意内容，而不一定是Java的元素。 </p>
+<p>可以通过 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">e.getData(PlatformDataKeys.EDITOR).getDocument()</div></pre></td></tr></table></figure>
+<p>获取当前编辑器中的文件的Document。</p>
+<p>同时，对于一个Document的读、写操作需要Command实现，Command操作当用户撤销的时候会进行回退：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">CommandProcessor.getInstance().executeCommand()</div></pre></td></tr></table></figure>
+<h3 id="CaretModel坐标体系"><a href="#CaretModel坐标体系" class="headerlink" title="CaretModel坐标体系"></a>CaretModel坐标体系</h3><p>需要明确的是，在idea中当前插入光标caret代表，可以通过以下方法来获取插入光标：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Editor editor = e.getData(CommonDataKeys.EDITOR);</div><div class="line"><span class="keyword">if</span> (editor == <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="keyword">return</span>;</div><div class="line">&#125;</div><div class="line">CaretModel caretModel = editor.getCaretModel();</div></pre></td></tr></table></figure>
+<p>其中有两种坐标系，一个是Logical Position、一种是Visual Position。</p>
+<p>Logical Position表示插入光标具体的行位置或列位置，是忽略折叠的，Visual Position就是视觉上的位置。不折叠的时候两个位置不同，折叠的时候相同。</p>
+<h3 id="AnAction"><a href="#AnAction" class="headerlink" title="AnAction"></a>AnAction</h3><p>当IDEA中某个按钮或者行为被触发的时候，会回调到我们定义的Action上去，Action中有两个关键的方法，actionPerformed和update，在update中我们可以设置所要展示菜单的显示与否，而在actionPerformed中则是插件触发的逻辑实现。</p>
+<p>关于AnAtion部分网上的资料很多，这里不详细说明。不过这里有一个小陷阱希望各位注意，在插件工程配置文件plugin.xml中，有以下几个属性：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">id</span>&gt;</span><span class="tag">&lt;/<span class="name">id</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">name</span>&gt;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span><span class="tag">&lt;/<span class="name">version</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>其中id如果你没有指定，那么很不幸idea plugin project插件会为你自动指定一个，所以很有可能你的多个插件工程其实是同一个插件，这样也就导致了发生冲突的可能。同时，在笔者编写插件的过程中，发现有的时候编译了代码但是却没有相应的更新，那么我的建议是version设置为SNAPSHOT如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>不管怎样，请记得在新建工程后确定你的id，以及快照版本，来避免不必要的bug发生。</p>
+<h3 id="文件修改"><a href="#文件修改" class="headerlink" title="文件修改"></a>文件修改</h3><p>一般情况下，当我们有修改文件需求的时候，需要通过IDEA为我们提供的工作队列完成修改操作，基本上可以把修改代码的逻辑放在下面的模板中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">CommandProcessor.getInstance().executeCommand(project, <span class="keyword">new</span> Runnable() &#123;</div><div class="line">                <span class="meta">@Override</span></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                    ApplicationManager.getApplication().runWriteAction(<span class="keyword">new</span> Runnable() &#123;</div><div class="line">                        <span class="meta">@Override</span></div><div class="line">                        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                            generateCode(project, editor, aClass, membersChosen);</div><div class="line">                        &#125;</div><div class="line">                    &#125;);</div></pre></td></tr></table></figure>
+<p>外面的Command可以为你记录下当前操作，从而一次性Control Z 撤销。里面的Application主要为我们处理文件锁相关的逻辑，保证你的修改是正确的无冲突的。</p>
+<h3 id="PSI"><a href="#PSI" class="headerlink" title="PSI"></a>PSI</h3><p>Program Structure Interface，编程结构接口，很晦涩的翻译。个人的理解是，IDEA中一切你能看到的文件，都可以抽象为一个PSI元素，比如XML文件，文本文件，Java代码文件等等，同样以Java为例，可以获得一个 PsiFile，然后将文件转换为 PsiClass，通过PsiClass又可以获得一个类的域PsiField、方法PsiMethod，乃至方法中的语句PsiStatement等等内容。</p>
+<p>基本可以理解为，IDEA中你要操作的一切，都是通过PSI元素来实现的。</p>
+<h3 id="Swing"><a href="#Swing" class="headerlink" title="Swing"></a>Swing</h3><p>IDEA中，UI相关比如弹窗、菜单、按钮什么的，用的是Java的Swing，如果有高度定制化的UI编写需求可以简单学习一下Swing的基本组件及使用方法。</p>
+<p>本文中的插件菜单，是通过对GetterAndSetter生成器菜单的复用来做的。没错，GetterAndSetter本身也是一个插件，也有一个具体的Action。</p>
+<p>如果下载了IDEA社区版本的代码，可以简单看一下其中getterAndSetter的实现：</p>
+<p><img src="http://img.blog.csdn.net/20171130225901940?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveXkyNTQxMTc0NDA=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<h3 id="PsiElementFactory"><a href="#PsiElementFactory" class="headerlink" title="PsiElementFactory"></a>PsiElementFactory</h3><p>可以通过</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">PsiElementFactory factory = JavaPsiFacade.getInstance(project).getElementFactory();</div></pre></td></tr></table></figure>
+<p>来获取。</p>
+<p>顾名思义，PsiElementFactory就是生成PsiElement的工厂，当生成一个类以后，向其中添加方法、添加注解、添加属性，乃至向方法中添加一条语句，整体的思路都是先从Factory中生成一个元素，然后设置这个元素，然后添加到相应的位置。</p>
+<p>举一个简单的例子，向原Class中添加Builder静态类，可以通过以下代码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">mainClass.add(builderClass);</div><div class="line">PsiClass builderClass = factory.createClass(<span class="string">"Builder"</span>);</div><div class="line">        PsiModifierList builderClassModifier = builderClass.getModifierList();</div><div class="line">        <span class="keyword">if</span> (builderClassModifier != <span class="keyword">null</span>) &#123;</div><div class="line">            builderClassModifier.setModifierProperty(PsiModifier.PUBLIC, <span class="keyword">true</span>);</div><div class="line">            builderClassModifier.setModifierProperty(PsiModifier.STATIC, <span class="keyword">true</span>);</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<p>套路很强，先生成元素，再添加元素。</p>
+<h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><p>其它内容，比如VFS(虚拟文件系统)，File View Providers以及配置相关的东西，怎么用gradle构建项目等等，暂时还不需要使用到。建议简单的浏览一下这个Builder 的代码，可以掌握插件开发的代码生成工具的基本方法及流程，代码很简单，没有进行重构。</p>
+<p>项目地址： <a href="https://github.com/MrYy/IdeaPlugin" target="_blank" rel="external">https://github.com/MrYy/IdeaPlugin</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;插件基本效果&quot;&gt;&lt;a href=&quot;#插件基本效果&quot; class=&quot;headerlink&quot; title=&quot;插件基本效果&quot;&gt;&lt;/a&gt;插件基本效果&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20171130223706096?w
+    
+    </summary>
+    
+    
+      <category term="Java" scheme="http://mryy.com/tags/Java/"/>
+    
+  </entry>
   
   <entry>
     <title>EventBus 源码分析</title>
